@@ -1,10 +1,24 @@
-import React from "react";
+import React, { useState} from "react";
 const api = {
   key: "6b58cd06a3a4bf2869202bf00fb23e60",
   base: "https://api.openweathermap.org/data/2.5/"
 }
 
 function App() {
+  const [query, setQuery] = useState('');
+  const [weather, setWeather] = useState('');
+
+  const search = evt => {
+    if (evt.key === "Enter") {
+      fetch(`${api.base}weather?q=${query}&units=imperial&APPID=${api.key}`)
+        .then(res => res.json())
+        .then (result => {
+          setWeather(result);
+          setQuery('');
+          console.log(result);
+        });
+    }
+  }
 
   const dateBuilder = (d) => {
     let months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -24,21 +38,29 @@ function App() {
             <input 
             type= "text"
             className="search-bar"
-            placeholder="Search for a location...">
+            placeholder="Search for a location..."
+            onChange={e => setQuery(e.target.value)}
+            value={query}
+            onKeyPress={search}
+            >
             </input>
           </div>
-          <div className="location-box">
-            <div className="location">Breckenridge, CO</div>
-            <div className="date">{dateBuilder(new Date())}</div>
-          </div>
-          <div className="weather-box">
-            <div className="temp">
-              50*f
+          {(typeof weather.main != "undefined") ? (
+          <div>
+            <div className="location-box">
+              <div className="location">{weather.name}, {weather.sys.country}</div>
+              <div className="date">{dateBuilder(new Date())}</div>
             </div>
-            <div className="weather">
-              cloudy
+            <div className="weather-box">
+              <div className="temp">
+                {Math.round(weather.main.temp)}°F
+              </div>
+              <div className="weather">
+                {weather.weather[0].main}
+              </div>
             </div>
           </div>
+          ) : ('')}
         </main>
     </div>
   );
